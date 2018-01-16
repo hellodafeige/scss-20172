@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>课程维护</title>
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <link rel="stylesheet" href="css/jquery-ui.css"/>
+    <link rel="stylesheet" href="css/easyui.css"/>
+    <link rel="stylesheet" href="css/color.css"/>
+    <link rel="stylesheet" href="css/icon.css"/>
+</head>
+<body>
+<div class="container">
+    <div id="tool-bar" style="padding:3px">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="openSaveDialog()">添加新课程</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="openUpdateDialog()">编辑</a>
+        <form id="search-form" action="/course/export" method="POST">
+            <span>名称</span>
+            <input id="name" name="name" style="line-height:20px;border:1px solid #ccc">
+            <span>状态</span>
+            <select id="status" name="status">
+                <option value="">请选择</option>
+                <option value="AC">待选</option>
+                <option value="PS">备选</option>
+                <option value="CM">结束</option>
+            </select>
+            <span>开始</span>
+            <input id="begin" name="begin" type="date" style="line-height:20px;border:1px solid #ccc">
+            <span>结束</span>
+            <input id="end" name="begin" type="date" style="line-height:20px;border:1px solid #ccc">
+            <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">查询</a>
+            <a href="#" class="easyui-linkbutton" plain="true" onclick="doExport()">导出数据</a>
+        </form>
+    </div>
+    <table id="course-list"></table>
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+        <input type="file" id="file" name="file" />
+        <button type="button" onclick="upload()">导入</button>
+    </form>
+    <progress id="progressBar" value="0" max="100" ></progress><span id="target"></span>
+</div>
+<!-- 保存对话框开始 -->
+<div id="save-dialog" hidden>
+    <form id="save-form" method="POST">
+        <div>
+            <label>名称：</label><input id="save-name"/>
+        </div>
+        <div>
+            <label>讲师：</label><input id="save-teacher"/>
+        </div>
+        <div>
+            <label>班主任：</label><input id="save-service-teacher"/>
+        </div>
+        <div>
+            <label>班主任电话：</label><input id="save-service-teacher-tel"/>
+        </div>
+        <div>
+            <label>上课时间：</label><input id="save-begin-teach-time" type="datetime-local"/>
+        </div>
+        <div>
+            <label>结束时间：</label><input id="save-end-teach-time" type="datetime-local"/>
+        </div>
+        <div>
+            <label>选课开始时间：</label><input id="save-begin-select-time" type="datetime-local"/>
+        </div>
+        <div>
+            <label>选课结束时间：</label><input id="save-end-select-time" type="datetime-local"/>
+        </div>
+        <div>
+            <label>教室：</label><input id="save-classroom"/>
+        </div>
+        <div>
+            <label>课容量：</label><input id="save-max-amount"/>
+        </div>
+        <div>
+            <label>学分：</label><input id="save-credit"/>
+        </div>
+    </form>
+</div>
+<div id="save-buttons" hidden>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="$('#save-dialog').dialog('close')">取消</a>
+</div>
+<!-- 保存对话框结束 -->
+
+<!-- 数据修改对话框开始 -->
+<div id="update-dialog" hidden>
+    <form id="update-form" method="POST">
+        <div>
+            <label>名称：</label><input id="update-name"/>
+            <input id="update-id" type="hidden"/>
+        </div>
+        <div>
+            <label>讲师：</label><input id="update-teacher"/>
+        </div>
+        <div>
+            <label>班主任：</label><input id="update-service-teacher"/>
+        </div>
+        <div>
+            <label>班主任电话：</label><input id="update-service-teacher-tel"/>
+        </div>
+        <div>
+            <label>上课时间：</label><input id="update-begin-teach-time" type="datetime-local"/>
+        </div>
+        <div>
+            <label>结束时间：</label><input id="update-end-teach-time" type="datetime-local"/>
+        </div>
+        <div>
+            <label>选课开始时间：</label><input id="update-begin-select-time" type="datetime-local"/>
+        </div>
+        <div>
+            <label>选课结束时间：</label><input id="update-end-select-time" type="datetime-local"/>
+        </div>
+        <div>
+            <label>教室：</label><input id="update-classroom"/>
+        </div>
+        <div>
+            <label>课容量：</label><input id="update-max-amount"/>
+        </div>
+        <div>
+            <label>学分：</label><input id="update-credit"/>
+        </div>
+        <div>
+            <label>状态：</label>
+            <select id="update-status">
+                <option value="AC">待选</option>
+                <option value="PS">备选</option>
+                <option value="CM">完成</option>
+            </select>
+        </div>
+    </form>
+</div>
+<div id="update-buttons" hidden>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="update()">修改</a>
+    <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="$('#update-dialog').dialog('close')">取消</a>
+</div>
+<!-- 数据修改对话框结束 -->
+
+<script src="js/jquery-3.2.1.js"></script>
+<script src="js/bootstrap.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.easyui.min.js"></script>
+<script src="js/easyui-lang-zh_CN.js"></script>
+<script>
+    $('#course-list').datagrid({
+        title: "课程列表",
+        url: '/course/query',
+        method: "POST",
+        pagination: true,
+        pageList: [3, 5, 10],
+        toolbar: "#tool-bar",
+        columns: [[
+            {field: 'idStr', title: 'ID', checkbox: true, resizable: true},
+            {field: 'name', title: '名称', width: 100, resizable: true},
+            {field: 'teacher', title: '讲师', width: 50, resizable: true},
+            {field: 'serviceTeacher', title: '班主任', width: 50, resizable: true},
+            {field: 'serviceTeacherTel', title: '班主任电话', width: 100, resizable: true},
+            {field: 'classroom', title: '教室', width: 50, resizable: true},
+            {field: 'beginTeachTime', title: '开始上课时间', width: 150, resizable: true},
+            {field: 'endTeachTime', title: '结束上课时间', width: 150, resizable: true},
+            {field: 'beginSelectTime', title: '开始选课时间', width: 150, resizable: true},
+            {field: 'endSelectTime', title: '结束选课时间', width: 150, resizable: true},
+            {field: 'credit', title: '学分', width: 40, resizable: true},
+            {field: 'maxAmount', title: '课容量', width: 40, resizable: true},
+            {field: 'currentAmount', title: '已选人数', width: 40, resizable: true},
+            {field: 'status', title: '状态', width: 40, resizable: true}
+        ]]
+    });
+
+    function doSearch() {
+        $('#course-list').datagrid('load', {
+            "name": $("#name").val(),
+            "status": $("#status").val(),
+            "begin": $("#begin").val(),
+            "end": $("#end").val()
+        });
+    }
+
+    function openSaveDialog() {
+        $('#save-dialog').dialog({
+            title: "添加新课程",
+            width: 350,
+            height: 400,
+            closed: false,
+            cache: false,
+            modal: true,
+            buttons: "#save-buttons"
+        });
+        $("#save-dialog").dialog('open');
+    }
+
+    function save() {
+        let course = {
+            "name": $("#save-name").val(),
+            "teacher": $("#save-teacher").val(),
+            "serviceTeacher": $("#save-service-teacher").val(),
+            "serviceTeacherTel": $("#save-service-teacher-tel").val(),
+            "classroom": $("#save-classroom").val(),
+            "beginTeachTime": $("#save-begin-teach-time").val().replace("T", " "),
+            "endTeachTime": $("#save-end-teach-time").val().replace("T", " "),
+            "beginSelectTime": $("#save-begin-select-time").val().replace("T", " "),
+            "endSelectTime": $("#save-end-select-time").val().replace("T", " "),
+            "credit": $("#save-credit").val(),
+            "maxAmount": $("#save-max-amount").val()
+        };
+
+        $.ajax({
+            url: "/course",
+            type: "POST",
+            data: JSON.stringify(course),
+            dataType: "json",
+            contentType: "application/json"
+        }).then(function (message) {
+            alert(message.messageText);
+            $("#save-form").get(0).reset();
+            $("#course-list").datagrid('reload');
+            $("#save-dialog").dialog('close');
+        }, function (xhr) {
+            alert(xhr.responseText);
+        });
+    }
+
+    function openUpdateDialog() {
+        let course = $("#course-list").datagrid('getSelected');
+
+        console.log(JSON.stringify(course));
+
+        $("#update-id").val(course.idStr);
+        $("#update-name").val(course.name);
+        $("#update-teacher").val(course.teacher);
+        $("#update-service-teacher").val(course.serviceTeacher);
+        $("#update-service-teacher-tel").val(course.serviceTeacherTel);
+        $("#update-classroom").val(course.classroom);
+        $("#update-begin-teach-time").val(course.beginTeachTime.replace(" ", "T"));
+        $("#update-end-teach-time").val(course.endTeachTime.replace(" ", "T"));
+        $("#update-begin-select-time").val(course.beginSelectTime.replace(" ", "T"));
+        $("#update-end-select-time").val(course.endSelectTime.replace(" ", "T"));
+        $("#update-credit").val(course.credit);
+        $("#update-max-amount").val(course.maxAmount);
+        $("#update-status").val(course.status);
+
+        $('#update-dialog').dialog({
+            title: "修改课程信息",
+            width: 350,
+            height: 400,
+            closed: false,
+            cache: false,
+            modal: true,
+            buttons: "#update-buttons"
+        });
+        $("#update-dialog").dialog('open');
+    }
+
+    function update() {
+        let course = {
+            "id": $("#update-id").val(),
+            "name": $("#update-name").val(),
+            "teacher": $("#update-teacher").val(),
+            "serviceTeacher": $("#update-service-teacher").val(),
+            "serviceTeacherTel": $("#update-service-teacher-tel").val(),
+            "classroom": $("#update-classroom").val(),
+            "beginTeachTime": $("#update-begin-teach-time").val().replace("T", " "),
+            "endTeachTime": $("#update-end-teach-time").val().replace("T", " "),
+            "beginSelectTime": $("#update-begin-select-time").val().replace("T", " "),
+            "endSelectTime": $("#update-end-select-time").val().replace("T", " "),
+            "credit": $("#update-credit").val(),
+            "maxAmount": $("#update-max-amount").val(),
+            "status": $("#update-status").val()
+        };
+
+        console.log(JSON.stringify(course));
+
+        $.ajax({
+            url: "/course",
+            type: "PUT",
+            data: JSON.stringify(course),
+            dataType: "json",
+            contentType: "application/json"
+        }).then(function (message) {
+            alert(message.messageText);
+            // 更新成功后，调用数据网格组件的重新加载数据方法
+            $("#course-list").datagrid('reload');
+            $("#update-dialog").dialog('close');
+        }, function (xhr) {
+            alert(xhr.responseText);
+        });
+    }
+
+    function doExport() {
+        $("#search-form").get(0).submit();
+    }
+
+    function upload() {
+        var fileObj = document.getElementById("file").files[0]; // 获取文件对象
+        var FileController = "/course/importData"; // 接收上传文件的后台URL
+        // FormData对象
+        var form = new FormData();
+        form.append("file", fileObj); // 文件对象
+        // XMLHttpRequest对象
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", FileController, true);
+        xhr.onload = function() {
+            alert("上传完成!");
+        };
+        xhr.upload.addEventListener("progress", progress, false);
+        xhr.send(form);
+    }
+    function progress(evt) {
+        var progressBar = document.getElementById("progressBar");
+        var target = document.getElementById("target");
+        if (evt.lengthComputable) {
+            progressBar.max = evt.total;
+            progressBar.value = evt.loaded;
+            target.innerHTML = Math.round(evt.loaded / evt.total * 100)
+                + "%";
+        }
+    }
+</script>
+</body>
+</html>

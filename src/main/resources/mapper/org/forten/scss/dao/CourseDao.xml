@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.forten.scss.dao.CourseDao">
+	<resultMap type="org.forten.scss.dto.vo.CourseForTeacher" id="courseMapForTeacher">
+		<id property="id" column="id" />
+		<result property="name" column="name"/>
+		<result property="teacher" column="teacher"/>
+		<result property="intro" column="intro"/>
+		<result property="serviceTeacher" column="service_teacher"/>
+		<result property="serviceTeacherTel" column="service_teacher_tel"/>
+		<result property="beginTeachTime" column="begin_teach_time"/>
+		<result property="endTeachTime" column="end_teach_time"/>
+		<result property="beginSelectTime" column="begin_select_time"/>
+		<result property="endSelectTime" column="end_select_time"/>
+		<result property="classroom" column="classroom"/>
+		<result property="maxAmount" column="max_amount"/>
+		<result property="currentAmount" column="current_amount"/>
+		<result property="credit" column="credit"/>
+		<result property="status" column="status"/>
+	</resultMap>
+
+	<select id="queryCountForTeacher" resultType="long">
+		SELECT
+		count(id)
+		FROM course
+		<where>
+			<if test="name != null and name != ''">
+				<bind name="nameLike" value="'%'+name+'%'" />
+				AND name LIKE #{nameLike}
+			</if>
+			<if test="status != null and status != ''">
+				AND status=#{status}
+			</if>
+			<if test="begin!=null and end!=null">
+				AND begin_teach_time BETWEEN #{begin} AND #{end}
+			</if>
+		</where>
+	</select>
+
+	<select id="queryForTeacher" resultMap="courseMapForTeacher">
+		SELECT
+		*
+		FROM course
+		<where>
+			<if test="name != null and name != ''">
+				<bind name="nameLike" value="'%'+name+'%'" />
+				AND name LIKE #{nameLike}
+			</if>
+			<if test="status != null and status != ''">
+				AND status=#{status}
+			</if>
+			<if test="begin!=null and end!=null">
+				AND begin_teach_time BETWEEN #{begin} AND #{end}
+			</if>
+		</where>
+		ORDER BY id DESC
+		limit #{first},#{rows}
+	</select>
+
+	<select id="queryForExport" resultMap="courseMapForTeacher">
+		SELECT
+		*
+		FROM course
+		<where>
+			<if test="name != null and name != ''">
+				<bind name="nameLike" value="'%'+name+'%'" />
+				AND name LIKE #{nameLike}
+			</if>
+			<if test="status != null and status != ''">
+				AND status=#{status}
+			</if>
+			<if test="begin!=null and end!=null">
+				AND begin_teach_time BETWEEN #{begin} AND #{end}
+			</if>
+		</where>
+		ORDER BY id
+	</select>
+</mapper>

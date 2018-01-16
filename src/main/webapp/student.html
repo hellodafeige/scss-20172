@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>学员信息</title>
+    <link rel="stylesheet" href="css/bootstrap.css" />
+    <link rel="stylesheet" href="css/jquery-ui.css" />
+    <link rel="stylesheet" href="css/easyui.css" />
+    <link rel="stylesheet" href="css/color.css" />
+    <link rel="stylesheet" href="css/icon.css" />
+</head>
+<body>
+<div class="container">
+    <div id="tool-bar" style="padding: 3px">
+        <span>姓名</span>
+        <input id="name" name="name" style="line-height: 20px;border:1px solid #ccc">
+        <span>性别</span>
+        <select name="gender" id="gender">
+            <option value="">请选择</option>
+            <option value="NAN">男</option>
+            <option value="NV">女</option>
+        </select>
+        <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">查询</a>
+    </div>
+    <table id="student-list"></table>
+</div>
+<script src="js/jquery-3.2.1.js"></script>
+<script src="js/bootstrap.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.easyui.min.js"></script>
+<script src="js/easyui-lang-zh_CN.js"></script>
+
+<script>
+    $('#student-list').datagrid({
+        title: "学员信息",
+        url: '/student/query',
+        method: "POST",
+        pagination: true,
+        pageList: [3, 5, 10],
+        toolbar: "#tool-bar",
+        columns: [[
+            {field: 'idStr', title: 'ID', checkbox: true, resizable: true},
+            {field: 'name', title: '姓名', width: 100, resizable: true},
+            {field: 'gender', title: '性别', width: 50, resizable: true},
+            {field: 'phone', title: '电话', width: 50, resizable: true},
+            {field: 'mailbox', title: '邮箱', width: 100, resizable: true},
+        ]]
+    });
+
+    function doSearch() {
+        $('#student-list').datagrid('load', {
+            "name": $("#name").val(),
+            "gender": $("#gender").val()
+        });
+    }
+
+
+
+</script>
+
+</body>
+</html>
