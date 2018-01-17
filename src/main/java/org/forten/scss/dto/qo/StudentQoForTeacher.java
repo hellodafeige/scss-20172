@@ -8,9 +8,12 @@ public class StudentQoForTeacher {
     private int page;
     private int rows;
 
-    public StudentQoForTeacher() {
-        page = 1;
-        rows = 10;
+    public StudentQoForTeacher(String name, String gender, int first, int page, int rows) {
+        this.name = name;
+        setGender(gender);
+        this.first = first;
+        this.page = page;
+        this.rows = rows;
     }
 
     public String getName() {
@@ -22,11 +25,19 @@ public class StudentQoForTeacher {
     }
 
     public String getGender() {
+
         return gender;
     }
 
-    public void setGender(String gender) {
-        this.gender = gender;
+    public String  setGender(String gender) {
+        if (gender.equals("NAN") ){
+            return this.gender = "男";
+        }
+        if (gender.equals("NV")){
+            return this.gender = "女";
+        }
+        return this.gender = gender;
+
     }
 
     public int getFirst() {

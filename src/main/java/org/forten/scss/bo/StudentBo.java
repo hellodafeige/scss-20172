@@ -3,12 +3,17 @@ package org.forten.scss.bo;
 import org.apache.ibatis.session.SqlSession;
 import org.forten.dao.HibernateDao;
 import org.forten.dao.MybatisDao;
+import org.forten.dto.Message;
 import org.forten.dto.PageInfo;
 import org.forten.dto.PagedRo;
 import org.forten.scss.dao.StudentDao;
 import org.forten.scss.dto.qo.StudentQoForTeacher;
 import org.forten.scss.dto.ro.PagedRoForEasyUI;
 import org.forten.scss.dto.vo.StudentForTeacher;
+import org.forten.scss.entity.Course;
+import org.forten.scss.entity.Student;
+import org.forten.utils.system.BeanPropertyUtil;
+import org.forten.utils.system.ValidateUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,4 +46,34 @@ public class StudentBo {
         SqlSession session = mybatisDao.openSession();
         return session.getMapper(StudentDao.class);
     }
+
+    @Transactional
+    public Message doSave(Student student){
+        // TODO 可以使用AOP技术进行以下代码的分离
+        ValidateUtil.validateThrow(student);
+        try {
+            dao.save(student);
+            System.out.println(student);
+            return Message.info("保存成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return Message.error("保存失败");
+        }
+    }
+
+    @Transactional
+    public Message doUpdate(Student s){
+        // TODO 可以使用AOP技术进行以下代码的分离
+        ValidateUtil.validateThrow(s);
+        try {
+            Student student = dao.loadById(Student.class,s.getId());
+            BeanPropertyUtil.copy(student,s);
+
+            return Message.info("课程修改成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Message.error("课程修改失败！");
+        }
+    }
+
 }

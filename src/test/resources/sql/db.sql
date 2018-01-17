@@ -8,7 +8,7 @@ CREATE TABLE student
 (
   id bigint(19) PRIMARY KEY COMMENT '唯一标识',
   name VARCHAR(80) NOT NULL COMMENT '姓名',
-  gender CHAR(2) NOT NULL COMMENT '性别: NAN男；NV女',
+  gender VARCHAR(30) NOT NULL COMMENT '性别: NAN男；NV女',
   phone VARCHAR(30) NOT NULL COMMENT '电话',
   mailbox VARCHAR(50) NOT NULL COMMENT '邮箱'
 );

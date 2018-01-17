@@ -1,5 +1,7 @@
 package org.forten.scss.entity;
 
+import org.forten.utils.system.CurrentTimeKeyBuilder;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -21,6 +23,7 @@ public class Student implements Serializable{
     private String mailbox;
 
     public Student() {
+        this.id = CurrentTimeKeyBuilder.getInstance().nextPK();
     }
 
     public long getId() {
@@ -48,7 +51,14 @@ public class Student implements Serializable{
     }
 
     public void setGender(String gender) {
-        this.gender = gender;
+        if (gender.equals("NAN")){
+            this.gender = "男";
+        }else
+        if (gender.equals("NV")){
+            this.gender = "女";
+        }else {
+            this.gender = gender;
+        }
     }
 
     public void setPhone(String phone) {

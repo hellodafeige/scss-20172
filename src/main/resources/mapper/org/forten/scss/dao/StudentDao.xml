@@ -34,7 +34,7 @@
 				AND name LIKE #{nameLike}
 			</if>
 			<if test="gender != null and gender != ''">
-				AND gender=#{gender}
+				AND gender = #{gender}
 			</if>
 		</where>
 		ORDER BY id DESC
