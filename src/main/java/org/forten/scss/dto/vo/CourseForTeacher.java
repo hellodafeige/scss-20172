@@ -152,6 +152,7 @@ public class CourseForTeacher {
     public String getIdStr(){
         return this.id+"";
     }
+
     public String getBeginTeachTimeStr(){
         if(this.beginTeachTime==null){
             return "";

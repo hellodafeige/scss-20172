@@ -45,9 +45,10 @@ public class StudentAction {
 
     @PutMapping("/student")
     public @ResponseBody
-    Message update(@RequestBody Student s) {
+    Message update(@RequestBody StudentForTeacher vo) {
         try {
-            return bo.doUpdate(s);
+
+            return bo.doUpdate(vo);
         } catch (ValidateException e) {
             return Message.error(StringUtil.join(e.getMessages(), "<br>"));
         }

@@ -62,17 +62,18 @@ public class StudentBo {
     }
 
     @Transactional
-    public Message doUpdate(Student s){
+    public Message doUpdate(StudentForTeacher vo){
         // TODO 可以使用AOP技术进行以下代码的分离
-        ValidateUtil.validateThrow(s);
+        ValidateUtil.validateThrow(vo);
         try {
-            Student student = dao.loadById(Student.class,s.getId());
-            BeanPropertyUtil.copy(student,s);
+            Student student = dao.loadById(Student.class,vo.getId());
 
-            return Message.info("课程修改成功！");
+            BeanPropertyUtil.copy(student,vo);
+
+            return Message.info("学员信息修改成功！");
         } catch (Exception e) {
             e.printStackTrace();
-            return Message.error("课程修改失败！");
+            return Message.error("学员信息修改失败！");
         }
     }
 

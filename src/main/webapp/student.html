@@ -11,6 +11,7 @@
 </head>
 <body>
 <div class="container">
+    <input id="update-id" type="hidden"/>
     <div id="tool-bar" style="padding: 3px">
         <a href="#" class="easyui-linkbutton" iconCls="icon.add" plain="true" onclick="openSaveDialog()">添加新学员</a>
         <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="openUpdateDialog()">编辑</a>
@@ -28,6 +29,7 @@
 </div>
 <div id="save-dialog" hidden>
     <form id="save-form" method="POST">
+
         <div>
             <lable>姓名：</lable>
             <input id="save-name"/>
@@ -54,17 +56,16 @@
     <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="$('#save-dialog').dialog('close')">取消</a>
 </div>
 <div id="update-dialog" hidden>
+
     <form id="update-form" method="POST">
         <div>
             <label>姓名：</label><input id="update-name"/>
-            <!--<input id="update-id" type="hidden"/>-->
         </div>
         <div>
             <label>性别：</label>
             <select id="update-gender">
                 <option value="NAN">男</option>
                 <option value="NV">女</option>
-                <!--<option value="CM">完成</option>-->
             </select>
         </div>
         <div>
@@ -146,6 +147,8 @@
         });
     }
 
+
+
     function openUpdateDialog() {
         let student = $("#student-list").datagrid('getSelected');
 
@@ -156,14 +159,6 @@
         $("#update-gender").val(student.gender);
         $("#update-phone").val(student.phone);
         $("#update-mailbox").val(student.mailbox);
-//        $("#update-classroom").val(course.classroom);
-//        $("#update-begin-teach-time").val(course.beginTeachTime.replace(" ", "T"));
-//        $("#update-end-teach-time").val(course.endTeachTime.replace(" ", "T"));
-//        $("#update-begin-select-time").val(course.beginSelectTime.replace(" ", "T"));
-//        $("#update-end-select-time").val(course.endSelectTime.replace(" ", "T"));
-//        $("#update-credit").val(course.credit);
-//        $("#update-max-amount").val(course.maxAmount);
-//        $("#update-status").val(course.status);
 
         $('#update-dialog').dialog({
             title: "修改学员信息",
@@ -184,14 +179,6 @@
             "gender": $("#update-gender").val(),
             "phone": $("#update-phone").val(),
             "mailbox": $("#update-mailbox").val()
-//            "classroom": $("#update-classroom").val(),
-//            "beginTeachTime": $("#update-begin-teach-time").val().replace("T", " "),
-//            "endTeachTime": $("#update-end-teach-time").val().replace("T", " "),
-//            "beginSelectTime": $("#update-begin-select-time").val().replace("T", " "),
-//            "endSelectTime": $("#update-end-select-time").val().replace("T", " "),
-//            "credit": $("#update-credit").val(),
-//            "maxAmount": $("#update-max-amount").val(),
-//            "status": $("#update-status").val()
         };
 
         console.log(JSON.stringify(student));
@@ -204,7 +191,6 @@
             contentType: "application/json"
         }).then(function (message) {
             alert(message.messageText);
-            // 更新成功后，调用数据网格组件的重新加载数据方法
             $("#student-list").datagrid('reload');
             $("#update-dialog").dialog('close');
         }, function (xhr) {
