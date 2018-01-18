@@ -11,10 +11,10 @@
 </head>
 <body>
 <div class="container">
-    <input id="update-id" type="hidden"/>
     <div id="tool-bar" style="padding: 3px">
         <a href="#" class="easyui-linkbutton" iconCls="icon.add" plain="true" onclick="openSaveDialog()">添加新学员</a>
         <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="openUpdateDialog()">编辑</a>
+        <form id="search-form" action="/student/export" method="POST">
         <span>姓名</span>
         <input id="name" name="name" style="line-height: 20px;border:1px solid #ccc">
         <span>性别</span>
@@ -23,9 +23,16 @@
             <option value="NAN">男</option>
             <option value="NV">女</option>
         </select>
-        <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">查询</a>
+            <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">查询</a>
+            <a href="#" class="easyui-linkbutton" plain="true" onclick="doExport()">导出数据</a>
+        </form>
     </div>
     <table id="student-list"></table>
+    <form id="upload-form" method="POST" enctype="multipart/form-data">
+        <input type="file" id="file" name="file" />
+        <button type="button" onclick="upload()">导入</button>
+    </form>
+    <progress id="progressBar" value="0" max="100" ></progress><span id="target"></span>
 </div>
 <div id="save-dialog" hidden>
     <form id="save-form" method="POST">
@@ -60,6 +67,7 @@
     <form id="update-form" method="POST">
         <div>
             <label>姓名：</label><input id="update-name"/>
+            <input id="update-id" type="hidden"/>
         </div>
         <div>
             <label>性别：</label>
@@ -198,6 +206,35 @@
         });
     }
 
+    function doExport() {
+        $("#search-form").get(0).submit();
+    }
+
+
+
+    function upload() {
+    var fileObj = document.getElementById("file").files[0];
+    var FileController = "/student/importData";
+    var form = new FormData();
+    form.append("file", fileObj);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", FileController, true);
+    xhr.onload = function() {
+        alert("上传完成!");
+    };
+    xhr.upload.addEventListener("progress", progress, false);
+    xhr.send(form);
+    }
+    function progress(evt) {
+        var progressBar = document.getElementById("progressBar");
+        var target = document.getElementById("target");
+        if (evt.lengthComputable) {
+            progressBar.max = evt.total;
+            progressBar.value = evt.loaded;
+            target.innerHTML = Math.round(evt.loaded / evt.total * 100)
+                + "%";
+        }
+    }
 
 </script>
 

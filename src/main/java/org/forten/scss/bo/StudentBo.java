@@ -30,6 +30,10 @@ public class StudentBo {
     @Transactional(readOnly = true)
     public PagedRoForEasyUI<StudentForTeacher> queryBy(StudentQoForTeacher qo){
         StudentDao studentDao = getStudentDao();
+
+
+
+
         long count = studentDao.queryCountForTeacher(qo);
         if(count == 0){
             return new PagedRoForEasyUI<>(new PagedRo<>());
@@ -75,6 +79,18 @@ public class StudentBo {
             e.printStackTrace();
             return Message.error("学员信息修改失败！");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentForTeacher> queryForExport(StudentQoForTeacher qo){
+        System.out.println(qo);
+        List<StudentForTeacher> list = getStudentDao().queryForExport(qo);
+        return list;
+    }
+
+    @Transactional
+    public void doBatchSave(Student... students){
+        dao.save(students);
     }
 
 }

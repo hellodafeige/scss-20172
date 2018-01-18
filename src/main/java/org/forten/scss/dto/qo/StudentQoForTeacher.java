@@ -14,6 +14,8 @@ public class StudentQoForTeacher {
         this.first = first;
         this.page = page;
         this.rows = rows;
+//        page = 1;
+//        rows = 10;
     }
 
     public String getName() {
