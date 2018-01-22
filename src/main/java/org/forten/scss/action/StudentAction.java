@@ -95,12 +95,13 @@ public class StudentAction {
                 dataRow.createCell(2).setCellValue(s.getGender());
                 dataRow.createCell(3).setCellValue(s.getPhone());
                 dataRow.createCell(4).setCellValue(s.getMailbox());
-
-                response.setCharacterEncoding("UTF-8");
-                response.setHeader("Content-Disposition", "attachment; filename=student-list.xlsx");
-                ServletOutputStream out = response.getOutputStream();
-                wb.write(out);
             }
+
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=student-list.xlsx");
+            ServletOutputStream out = response.getOutputStream();
+            wb.write(out);
+
         }catch (Exception e){
             e.printStackTrace();
         }

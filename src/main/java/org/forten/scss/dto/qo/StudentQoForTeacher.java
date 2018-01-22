@@ -18,6 +18,12 @@ public class StudentQoForTeacher {
 //        rows = 10;
     }
 
+    public StudentQoForTeacher() {
+        this.first=0;
+        this.page=1;
+        this.rows=10;
+    }
+
     public String getName() {
         return name;
     }
