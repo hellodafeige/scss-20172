@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.forten.scss.dao.SelectCourseDao">
+    <resultMap type="org.forten.scss.dto.vo.CourseVoForSelect" id="courseMapForSelect">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="teacher" column="teacher"/>
+        <result property="serviceTeacher" column="service_teacher"/>
+        <result property="serviceTeacherTel" column="service_teacher_tel"/>
+        <result property="beginTeachTime" column="begin_teach_time"/>
+        <result property="classroom" column="classroom"/>
+        <result property="maxAmount" column="max_amount"/>
+        <result property="currentAmount" column="current_amount"/>
+        <result property="credit" column="credit"/>
+    </resultMap>
+
+    <select id="queryForSelect" resultMap="courseMapForSelect">
+        SELECT
+        id,name,teacher,service_teacher,service_teacher_tel,
+        begin_teach_time,classroom,max_amount,current_amount,credit
+        FROM course
+        WHERE current_timestamp BETWEEN begin_select_time AND end_select_time
+        AND id NOT IN
+        (
+          SELECT course_id
+          FROM sc_info
+          WHERE (opt_type='XK' OR opt_type='PD') AND student_id=#{studentId}
+        )
+    </select>
+
+    <select id="queryForCancel" resultMap="courseMapForSelect">
+        <![CDATA[
+            SELECT
+              id,name,teacher,service_teacher,service_teacher_tel,
+              begin_teach_time,classroom,max_amount,current_amount,credit
+            FROM course
+            WHERE current_timestamp<date_add(end_select_time, interval -1 day)
+            AND id IN (
+              SELECT course_id
+              FROM sc_info
+              WHERE (opt_type='XK' OR opt_type='PD') AND student_id=#{studentId}
+        )]]>
+    </select>
+
+    <select id="querySelectedCourse" resultMap="courseMapForSelect">
+        <![CDATA[
+          SELECT
+            id,name,teacher,service_teacher,service_teacher_tel,
+            begin_teach_time,classroom,max_amount,current_amount,credit
+          FROM course
+          WHERE current_timestamp < begin_teach_time
+          AND id IN (
+            SELECT course_id
+            FROM sc_info
+            WHERE (opt_type='XK' OR opt_type='PD') AND student_id=#{studentId}
+          );
+        ]]>
+    </select>
+</mapper>
