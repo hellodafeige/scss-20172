@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>选择课程</title>
+    <link rel="stylesheet" href="css/bootstrap.css"/>
+    <link rel="stylesheet" href="css/jquery-ui.css"/>
+    <link rel="stylesheet" href="css/easyui.css"/>
+    <link rel="stylesheet" href="css/color.css"/>
+    <link rel="stylesheet" href="css/icon.css"/>
+</head>
+<body>
+<div class="container">
+    <div class="easyui-tabs">
+        <div title="可选课程">
+            <div id="select-tool-bar" style="padding:3px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="selectCourse()">选课</a>
+            </div>
+            <table id="course-for-select-list"></table>
+        </div>
+        <div title="可退课程">
+            <div id="cancel-tool-bar" style="padding:3px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="cancelCourse()">退课</a>
+            </div>
+            <table id="course-for-cancel-list"></table>
+        </div>
+        <div title="已选课程">
+            <table id="selected-list"></table>
+        </div>
+    </div>
+</div>
+
+<script src="js/jquery-3.2.1.js"></script>
+<script src="js/bootstrap.js"></script>
+<script src="js/jquery-ui.js"></script>
+<script src="js/jquery.easyui.min.js"></script>
+<script src="js/easyui-lang-zh_CN.js"></script>
+<script>
+    $('#course-for-select-list').datagrid({
+        title: "可选课程列表",
+        url: '/sc/courseForSelectList',
+        method: "GET",
+        toolbar: "#select-tool-bar",
+        columns: [[
+            {field: 'idStr', title: 'ID', checkbox: true, resizable: true},
+            {field: 'name', title: '名称', width: 100, resizable: true},
+            {field: 'teacher', title: '讲师', width: 50, resizable: true},
+            {field: 'serviceTeacher', title: '班主任', width: 50, resizable: true},
+            {field: 'serviceTeacherTel', title: '班主任电话', width: 100, resizable: true},
+            {field: 'classroom', title: '教室', width: 50, resizable: true},
+            {field: 'beginTeachTime', title: '开始上课时间', width: 150, resizable: true},
+            {field: 'credit', title: '学分', width: 40, resizable: true},
+            {field: 'maxAmount', title: '课容量', width: 40, resizable: true},
+            {field: 'currentAmount', title: '已选人数', width: 40, resizable: true},
+        ]]
+    });
+
+    $('#course-for-cancel-list').datagrid({
+        title: "可退课程列表",
+        url: '/sc/courseForCancelList',
+        method: "GET",
+        toolbar: "#cancel-tool-bar",
+        columns: [[
+            {field: 'idStr', title: 'ID', checkbox: true, resizable: true},
+            {field: 'name', title: '名称', width: 100, resizable: true},
+            {field: 'teacher', title: '讲师', width: 50, resizable: true},
+            {field: 'serviceTeacher', title: '班主任', width: 50, resizable: true},
+            {field: 'serviceTeacherTel', title: '班主任电话', width: 100, resizable: true},
+            {field: 'classroom', title: '教室', width: 50, resizable: true},
+            {field: 'beginTeachTime', title: '开始上课时间', width: 150, resizable: true},
+            {field: 'credit', title: '学分', width: 40, resizable: true},
+            {field: 'maxAmount', title: '课容量', width: 40, resizable: true},
+            {field: 'currentAmount', title: '已选人数', width: 40, resizable: true},
+            {field: 'optTypeDes', title: '选课状态', width: 40, resizable: true}
+        ]]
+    });
+
+    $('#selected-list').datagrid({
+        title: "已选课程列表",
+        url: '/sc/selectedCourse',
+        method: "GET",
+        columns: [[
+            {field: 'name', title: '名称', width: 100, resizable: true},
+            {field: 'teacher', title: '讲师', width: 50, resizable: true},
+            {field: 'serviceTeacher', title: '班主任', width: 50, resizable: true},
+            {field: 'serviceTeacherTel', title: '班主任电话', width: 100, resizable: true},
+            {field: 'classroom', title: '教室', width: 50, resizable: true},
+            {field: 'beginTeachTime', title: '开始上课时间', width: 150, resizable: true},
+            {field: 'credit', title: '学分', width: 40, resizable: true},
+            {field: 'maxAmount', title: '课容量', width: 40, resizable: true},
+            {field: 'currentAmount', title: '已选人数', width: 40, resizable: true},
+            {field: 'optTypeDes', title: '选课状态', width: 40, resizable: true}
+        ]]
+    });
+
+    function selectCourse(){
+        let course = $('#course-for-select-list').datagrid('getSelected');
+
+        let si = {
+            "courseId":course.idStr
+        };
+
+        if(course.overMax){
+            si.optType="PD";
+        }else{
+            si.optType="XK";
+        }
+
+        $.ajax({
+            url: "/sc/select",
+            type: "POST",
+            data: JSON.stringify(si),
+            dataType: "json",
+            contentType: "application/json"
+        }).then(function (message) {
+            alert(message.messageText);
+            $('#course-for-select-list').datagrid('reload');
+            $('#course-for-cancel-list').datagrid('reload');
+            $('#selected-list').datagrid('reload');
+        }, function (xhr) {
+            alert(xhr.responseText);
+        });
+    }
+
+    function cancelCourse(){
+        let course = $('#course-for-cancel-list').datagrid('getSelected');
+
+        $.ajax({
+            url: "/sc/cancel/"+course.idStr,
+            type: "PUT",
+            contentType: "application/json"
+        }).then(function (message) {
+            alert(message.messageText);
+            $('#course-for-select-list').datagrid('reload');
+            $('#course-for-cancel-list').datagrid('reload');
+            $('#selected-list').datagrid('reload');
+        }, function (xhr) {
+            alert(xhr.responseText);
+        });
+    }
+</script>
+</body>
+</html>
