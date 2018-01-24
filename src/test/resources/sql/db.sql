@@ -32,21 +32,23 @@ CREATE TABLE student
   mailbox VARCHAR(50) NOT NULL COMMENT '邮箱'
 );
 
-CREATE TABLE sc_opt
-(
-	id bigint(19) PRIMARY KEY COMMENT '唯一标识',
-	cadre_id bigint(19) NOT NULL  COMMENT '唯一标识',
-	course_id bigint(19) NOT NULL COMMENT '唯一标识',
-	opt_type char(2) NOT NULL COMMENT '操作类型：选课：XK、退课：TK、排队：PD',
-	opt_time datetime DEFAULT current_timestamp NOT NULL COMMENT '操作时间'
-);
+-- CREATE TABLE sc_opt
+-- (
+-- 	id bigint(19) PRIMARY KEY COMMENT '唯一标识',
+-- 	student_id bigint(19) NOT NULL  COMMENT '唯一标识',
+-- 	course_id bigint(19) NOT NULL COMMENT '唯一标识',
+-- 	opt_type char(2) NOT NULL COMMENT '操作类型：选课：XK、退课：TK、排队：PD',
+-- 	opt_time datetime DEFAULT current_timestamp NOT NULL COMMENT '操作时间'
+-- );
 
 CREATE TABLE sc_info
 (
-	id bigint(19) PRIMARY KEY COMMENT '唯一标识',
-	cadre_id bigint(19) NOT NULL COMMENT '唯一标识',
+	student_id bigint(19) NOT NULL COMMENT '唯一标识',
 	course_id bigint(19) NOT NULL COMMENT '唯一标识',
-	attendance char(2) DEFAULT 'CQ' NOT NULL COMMENT '出勤情况：出勤：CQ、缺勤：QQ'
+	opt_type char(2) NOT NULL COMMENT '操作类型：选课：XK、退课：TK、排队：PD',
+	opt_time datetime DEFAULT current_timestamp NOT NULL COMMENT '操作时间',
+	attendance char(2) DEFAULT 'CQ' NOT NULL COMMENT '出勤情况：出勤：CQ、缺勤：QQ',
+	primary key id_pk (student_id,course_id)
 );
 
 
@@ -72,8 +74,6 @@ INSERT INTO student VALUES
 (19,'李敏','男','15932643528','15932643528@163.com'),
 (20,'王磊','女','15932643529','15932643529@163.com');
 
-commit;
-
 
 
 INSERT INTO course VALUES
@@ -86,7 +86,7 @@ INSERT INTO course VALUES
 (7,'宋诗','方会','','余远','18322283382','2018-02-10 14:30:00','2018-02-10 16:00:00','2018-01-25 00:00:00','2018-02-05 23:59:59','218',50,0,3,'PS'),
 (8,'唐宋八大家','常彬','','余远','18322283382','2018-02-11 14:30:00','2018-02-11 16:00:00','2018-01-25 00:00:00','2018-02-05 23:59:59','218',50,0,3,'PS'),
 (9,'Java中级','李成','','余远','18322283382','2018-03-10 14:30:00','2018-03-10 16:00:00','2018-02-15 00:00:00','2018-03-02 23:59:59','218',50,0,3,'PS'),
-(10,'明清经济社会形态','封鹏','','聂空','13322233333','2018-03-05 14:30:00','2018-03-05 16:00:00','2018-01-25 00:00:00','2018-02-20 23:59:59','218',50,0,3,'PS'),
+(10,'明清经济社会形态','封鹏','','聂空','13322233333','2018-03-05 14:30:00','2018-03-05 16:00:00','2018-01-25 00:00:00','2018-01-23 23:59:59','218',50,0,3,'PS'),
 (11,'法律与生活','蒯艳','','聂空','13322233333','2018-02-15 14:30:00','2018-02-15 16:00:00','2018-01-25 00:00:00','2018-02-10 23:59:59','218',50,0,3,'PS'),
 (12,'Java高级','徐文广','','聂空','13322233333','2018-02-17 14:30:00','2018-02-17 16:00:00','2018-01-25 00:00:00','2018-02-12 23:59:59','218',50,0,3,'PS'),
 (13,'考古故事','钱贡要','','聂空','13322233333','2018-02-19 14:30:00','2018-02-19 16:00:00','2018-01-25 00:00:00','2018-02-13 23:59:59','218',50,0,3,'PS'),
@@ -98,4 +98,30 @@ INSERT INTO course VALUES
 (19,'互联网的前瞻','周先','','余远','18322283382','2018-02-03 14:30:00','2018-02-03 16:00:00','2018-01-15 00:00:00','2018-02-05 23:59:59','218',50,0,2,'PS'),
 (20,'英文口语提高','胡娟','','余远','18322283382','2018-03-10 14:30:00','2018-03-10 16:00:00','2018-02-25 00:00:00','2018-03-07 23:59:59','218',50,0,1,'PS');
 
+
+INSERT INTO sc_info (student_id,course_id,opt_type,opt_time) VALUES
+(1,2,'XK','2018-01-23 10:30:22'),
+(1,4,'XK','2018-01-13 10:30:22'),
+(1,5,'TK','2018-01-23 10:30:22'),
+(1,10,'XK','2018-01-23 10:30:22'),
+(2,4,'PD','2018-01-23 10:30:22'),
+(3,4,'PD','2018-01-23 08:30:22');
+
 commit;
+
+
+-- 查询在可选时间范围内，且某个干部没有选中或排队的课程
+-- SELECT * FROM course WHERE current_timestamp BETWEEN begin_select_time AND end_select_time
+--AND id NOT IN (SELECT course_id FROM sc_info WHERE (opt_type='XK' OR opt_type='PD') AND student_id=1);
+
+-- 查询某个干部在可退课范围内的课程
+--SELECT * FROM course WHERE current_timestamp < date_add(end_select_time, interval -1 day)
+--AND id IN (SELECT course_id FROM sc_info WHERE (opt_type='XK' OR opt_type='PD') AND student_id=1);
+
+-- 查询某个干部已经选中或排队，但还没有上课的课程。
+--SELECT * FROM course WHERE current_timestamp < begin_teach_time
+--AND id IN (SELECT course_id FROM sc_info WHERE (opt_type='XK' OR opt_type='PD') AND student_id=1);
+
+-- 类型Oracle的merge，当主键存在执行update，否则执行insert into
+--replace into sc_info (student_id,course_id,opt_type,opt_time) values(1,2,'AA',current_timestamp);
+--replace into sc_info (student_id,course_id,opt_type,opt_time) values(2,2,'XK',current_timestamp);

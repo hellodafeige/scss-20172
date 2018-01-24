@@ -36,7 +36,7 @@ public class StudentAction {
 
             return bo.doSave(student);
         }catch (ValidateException e){
-            return Message.error(StringUtil.join(e.getMessages(), "<br>"));
+            return Message.error(StringUtil.join(e.getMessages(),"<br>"));
         }
     }
 
@@ -47,7 +47,7 @@ public class StudentAction {
 
             return bo.doUpdate(vo);
         } catch (ValidateException e) {
-            return Message.error(StringUtil.join(e.getMessages(), "<br>"));
+            return Message.error(StringUtil.join(e.getMessages(),"<br>"));
         }
     }
 

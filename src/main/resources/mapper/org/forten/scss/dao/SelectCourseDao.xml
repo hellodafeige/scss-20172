@@ -14,6 +14,20 @@
         <result property="credit" column="credit"/>
     </resultMap>
 
+    <resultMap type="org.forten.scss.dto.vo.CourseVoForSelect" id="courseMapForSelect2">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="teacher" column="teacher"/>
+        <result property="serviceTeacher" column="service_teacher"/>
+        <result property="serviceTeacherTel" column="service_teacher_tel"/>
+        <result property="beginTeachTime" column="begin_teach_time"/>
+        <result property="classroom" column="classroom"/>
+        <result property="maxAmount" column="max_amount"/>
+        <result property="currentAmount" column="current_amount"/>
+        <result property="credit" column="credit"/>
+        <result property="optType" column="si_opt_type"/>
+    </resultMap>
+
     <select id="queryForSelect" resultMap="courseMapForSelect">
         SELECT
         id,name,teacher,service_teacher,service_teacher_tel,
@@ -28,14 +42,15 @@
         )
     </select>
 
-    <select id="queryForCancel" resultMap="courseMapForSelect">
+    <select id="queryForCancel" resultMap="courseMapForSelect2">
         <![CDATA[
             SELECT
-              id,name,teacher,service_teacher,service_teacher_tel,
-              begin_teach_time,classroom,max_amount,current_amount,credit
-            FROM course
-            WHERE current_timestamp<date_add(end_select_time, interval -1 day)
-            AND id IN (
+              c.id,c.name,c.teacher,c.service_teacher,c.service_teacher_tel,
+              c.begin_teach_time,c.classroom,c.max_amount,c.current_amount,c.credit,si.opt_type si_opt_type
+            FROM course c JOIN sc_info si ON (c.id=si.course_id) JOIN student ca ON (ca.id=si.student_id)
+            WHERE current_timestamp<date_add(c.end_select_time, interval -1 day)
+            AND si.student_id=#{studentId}
+            AND c.id IN (
               SELECT course_id
               FROM sc_info
               WHERE (opt_type='XK' OR opt_type='PD') AND student_id=#{studentId}
@@ -45,15 +60,59 @@
     <select id="querySelectedCourse" resultMap="courseMapForSelect">
         <![CDATA[
           SELECT
-            id,name,teacher,service_teacher,service_teacher_tel,
-            begin_teach_time,classroom,max_amount,current_amount,credit
-          FROM course
+            c.id,c.name,c.teacher,c.service_teacher,c.service_teacher_tel,
+              c.begin_teach_time,c.classroom,c.max_amount,c.current_amount,c.credit,si.opt_type si_opt_type
+          FROM course c JOIN sc_info si ON (c.id=si.course_id) JOIN student ca ON (ca.id=si.student_id)
           WHERE current_timestamp < begin_teach_time
-          AND id IN (
+          AND si.student_id=#{studentId}
+          AND c.id IN (
             SELECT course_id
             FROM sc_info
             WHERE (opt_type='XK' OR opt_type='PD') AND student_id=#{studentId}
           );
         ]]>
     </select>
+
+    <select id="queryPD2XK" resultType="Long" parameterType="long" >
+        <![CDATA[
+          SELECT student_id
+          FROM sc_info
+          WHERE course_id=#{courseId} AND opt_type='PD'
+          ORDER BY opt_time
+          limit 1
+        ]]>
+    </select>
+
+    <insert id="selectCourse" parameterType="org.forten.scss.dto.vo.SelectInfoVoForWrite">
+        <![CDATA[
+          replace into sc_info
+          (student_id,course_id,opt_type,opt_time)
+          values
+          (#{studentId},#{courseId},#{optType},CURRENT_TIMESTAMP);
+        ]]>
+    </insert>
+
+    <update id="cancelCourse" parameterType="long">
+        <![CDATA[
+          UPDATE sc_info
+          SET opt_type='TK',opt_time=CURRENT_TIMESTAMP
+          WHERE student_id=#{studentId} AND course_id=#{courseId}
+        ]]>
+    </update>
+
+    <update id="addOneCurrentAmount" parameterType="long">
+        <![CDATA[
+          UPDATE course
+          SET current_amount = current_amount + 1
+          WHERE id=#{courseId}
+        ]]>
+    </update>
+
+    <update id="subOneCurrentAmount" parameterType="long">
+        <![CDATA[
+          UPDATE course
+          SET current_amount = current_amount - 1
+          WHERE id=#{courseId}
+        ]]>
+    </update>
 </mapper>

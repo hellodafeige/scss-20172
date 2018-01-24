@@ -36,7 +36,7 @@ public class CourseAction {
         try {
             return bo.doSave(course);
         }catch(ValidateException e){
-            return Message.error(StringUtil.join(e.getMessages(), "<br>"));
+            return Message.error(org.forten.utils.common.StringUtil.join(e.getMessages(),"<br>"));
         }
     }
 
@@ -46,7 +46,7 @@ public class CourseAction {
         try {
             return bo.doUpdate(vo);
         } catch (ValidateException e) {
-            return Message.error(StringUtil.join(e.getMessages(), "<br>"));
+            return Message.error(StringUtil.join(e.getMessages(),"<br>"));
         }
     }
 
