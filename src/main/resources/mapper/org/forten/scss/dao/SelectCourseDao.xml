@@ -28,6 +28,7 @@
         <result property="optType" column="si_opt_type"/>
     </resultMap>
 
+    <!-- 可进行选课操作的课程 -->
     <select id="queryForSelect" resultMap="courseMapForSelect">
         SELECT
         id,name,teacher,service_teacher,service_teacher_tel,
@@ -41,7 +42,7 @@
           WHERE (opt_type='XK' OR opt_type='PD') AND student_id=#{studentId}
         )
     </select>
-
+    <!-- 可进行退课操作的课程 -->
     <select id="queryForCancel" resultMap="courseMapForSelect2">
         <![CDATA[
             SELECT
@@ -54,9 +55,10 @@
               SELECT course_id
               FROM sc_info
               WHERE (opt_type='XK' OR opt_type='PD') AND student_id=#{studentId}
-        )]]>
+        )
+        ]]>
     </select>
-
+    <!-- 干部已经选中或正在排队的未上课的所有课程 -->
     <select id="querySelectedCourse" resultMap="courseMapForSelect">
         <![CDATA[
           SELECT
@@ -115,4 +117,37 @@
           WHERE id=#{courseId}
         ]]>
     </update>
+
+    <select id="queryCreditForCount" resultType="Integer" parameterType="org.forten.scss.dto.qo.CreditQoForCount">
+        <![CDATA[
+            SELECT sum(cs.credit)
+            FROM
+                student c JOIN sc_info si
+                ON (c.id=si.student_id)
+                JOIN course cs
+                ON (cs.id=si.course_id)
+            WHERE
+                c.id=#{studentId}
+                AND current_timestamp>cs.end_teach_time
+                AND cs.begin_teach_time BETWEEN #{begin} AND #{end}
+                AND si.attendance='CQ'
+                AND si.opt_type='XK'
+        ]]>
+    </select>
+
+    <select id="queryCreditForNotBegin" resultType="Integer" parameterType="long">
+        <![CDATA[
+            SELECT sum(cs.credit)
+            FROM
+                student c JOIN sc_info si
+                ON (c.id=si.student_id)
+                JOIN course cs
+                ON (cs.id=si.course_id)
+            WHERE
+                c.id=#{studentId}
+                AND current_timestamp<cs.end_teach_time
+                AND si.attendance='CQ'
+                AND (si.opt_type='XK' OR si.opt_type='PD');
+        ]]>
+    </select>
 </mapper>

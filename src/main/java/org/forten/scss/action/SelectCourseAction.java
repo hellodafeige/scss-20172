@@ -57,4 +57,12 @@ public class SelectCourseAction {
 
         return bo.doCancelCourse(studentId,courseId);
     }
+
+    @GetMapping("/sc/credit")
+    public Message getCreditMsg(){
+        // TODO 干部ID应该从安全上下文中获取
+        long studentId = 1;
+
+        return bo.queryCreditForCount(studentId);
+    }
 }

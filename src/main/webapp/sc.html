@@ -11,6 +11,7 @@
 </head>
 <body>
 <div class="container">
+    <div id="credit-info"></div>
     <div class="easyui-tabs">
         <div title="可选课程">
             <div id="select-tool-bar" style="padding:3px">
@@ -97,7 +98,8 @@
         let course = $('#course-for-select-list').datagrid('getSelected');
 
         let si = {
-            "courseId":course.idStr
+            "courseId":course.idStr,
+            "credit":course.credit
         };
 
         if(course.overMax){
@@ -117,6 +119,7 @@
             $('#course-for-select-list').datagrid('reload');
             $('#course-for-cancel-list').datagrid('reload');
             $('#selected-list').datagrid('reload');
+            showCredit();
         }, function (xhr) {
             alert(xhr.responseText);
         });
@@ -134,10 +137,27 @@
             $('#course-for-select-list').datagrid('reload');
             $('#course-for-cancel-list').datagrid('reload');
             $('#selected-list').datagrid('reload');
+            showCredit();
         }, function (xhr) {
             alert(xhr.responseText);
         });
     }
+
+    function showCredit() {
+        $.ajax({
+            url: "/sc/credit",
+            type: "GET",
+            contentType: "application/json"
+        }).then(function (message) {
+            $("#credit-info").html(message.messageText);
+        }, function (xhr) {
+            alert(xhr.responseText);
+        });
+    }
+
+    $(function () {
+        showCredit();
+    });
 </script>
 </body>
 </html>

@@ -4,14 +4,16 @@ public class SelectInfoVoForWrite {
     private long studentId;
     private long courseId;
     private String optType;
+    private int credit;
 
     public SelectInfoVoForWrite() {
     }
 
-    public SelectInfoVoForWrite(long studentId, long courseId, String optType) {
+    public SelectInfoVoForWrite(long studentId, long courseId, String optType, int credit) {
         this.studentId = studentId;
         this.courseId = courseId;
         this.optType = optType;
+        this.credit = credit;
     }
 
     public long getStudentId() {
@@ -38,12 +40,21 @@ public class SelectInfoVoForWrite {
         this.optType = optType;
     }
 
+    public int getCredit() {
+        return credit;
+    }
+
+    public void setCredit(int credit) {
+        this.credit = credit;
+    }
+
     @Override
     public String toString() {
         return "SelectInfoVoForWrite{" +
                 "studentId=" + studentId +
                 ", courseId=" + courseId +
                 ", optType='" + optType + '\'' +
+                ", credit=" + credit +
                 '}';
     }
 }
