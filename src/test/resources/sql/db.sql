@@ -32,15 +32,6 @@ CREATE TABLE student
   mailbox VARCHAR(50) NOT NULL COMMENT '邮箱'
 );
 
--- CREATE TABLE sc_opt
--- (
--- 	id bigint(19) PRIMARY KEY COMMENT '唯一标识',
--- 	student_id bigint(19) NOT NULL  COMMENT '唯一标识',
--- 	course_id bigint(19) NOT NULL COMMENT '唯一标识',
--- 	opt_type char(2) NOT NULL COMMENT '操作类型：选课：XK、退课：TK、排队：PD',
--- 	opt_time datetime DEFAULT current_timestamp NOT NULL COMMENT '操作时间'
--- );
-
 CREATE TABLE sc_info
 (
 	student_id bigint(19) NOT NULL COMMENT '唯一标识',

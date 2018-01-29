@@ -9,8 +9,10 @@ import org.forten.dto.PagedRo;
 import org.forten.scss.dao.CourseDao;
 import org.forten.scss.dto.qo.CourseQoForTeacher;
 import org.forten.scss.dto.ro.PagedRoForEasyUI;
+import org.forten.scss.dto.vo.AttendanceVo;
 import org.forten.scss.dto.vo.CourseForTeacher;
 import org.forten.scss.dto.vo.CourseUpdateForTeacher;
+import org.forten.scss.dto.vo.NameListVo;
 import org.forten.scss.entity.Course;
 import org.forten.utils.system.BeanPropertyUtil;
 import org.forten.utils.system.ValidateUtil;
@@ -90,10 +92,24 @@ public class CourseBo {
         dao.save(courses);
     }
 
+    @Transactional(readOnly = true)
+    public List<NameListVo> queryNameList(long courseId){
+        return getCourseDao().queryNameList(courseId);
+    }
 
+    @Transactional(readOnly = true)
+    public List<CourseForTeacher> queryFinised(){
+        return getCourseDao().queryFinished();
+    }
 
+    @Transactional(readOnly = true)
+    public List<AttendanceVo> queryForAttendance(long coruseId){
+        return getCourseDao().queryForAttendance(coruseId);
+    }
 
-
-
+    @Transactional
+    public void doChangeAttendance(AttendanceVo vo){
+        getCourseDao().changeAttendance(vo);
+    }
 
 }

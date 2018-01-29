@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.forten.scss.dao.CourseDao">
 	<resultMap type="org.forten.scss.dto.vo.CourseForTeacher" id="courseMapForTeacher">
-		<id property="id" column="id" />
+		<id property="id" column="id"/>
 		<result property="name" column="name"/>
 		<result property="teacher" column="teacher"/>
 		<result property="intro" column="intro"/>
@@ -17,6 +17,21 @@
 		<result property="currentAmount" column="current_amount"/>
 		<result property="credit" column="credit"/>
 		<result property="status" column="status"/>
+	</resultMap>
+
+	<resultMap type="org.forten.scss.dto.vo.NameListVo" id="nameListMap">
+		<result property="name" column="studentName"/>
+		<result property="gender" column="studentGender"/>
+		<result property="phone" column="studentPhone"/>
+	</resultMap>
+
+	<resultMap type="org.forten.scss.dto.vo.AttendanceVo" id="attendanceMap">
+		<result property="courseId" column="courseId"/>
+		<result property="studentId" column="studentId"/>
+		<result property="studentName" column="studentName"/>
+		<result property="gender" column="gender"/>
+		<result property="phone" column="phone"/>
+		<result property="attendance" column="attendance"/>
 	</resultMap>
 
 	<select id="queryCountForTeacher" resultType="long">
@@ -75,4 +90,43 @@
 		</where>
 		ORDER BY id
 	</select>
+
+	<select id="queryFinished" resultMap="courseMapForTeacher">
+		SELECT *
+		FROM course
+		WHERE end_teach_time BETWEEN
+		(SELECT value FROM sys_params WHERE id='COUNT_BEGIN_DATE') AND current_timestamp
+		ORDER BY end_teach_time DESC
+	</select>
+
+	<select id="queryNameList" resultMap="nameListMap" parameterType="long">
+		<![CDATA[
+          SELECT c.gender studentGender,c.name studentName,c.phone studentPhone
+          FROM
+              student c JOIN sc_info si
+              ON (c.id=si.student_id)
+              JOIN course cs
+              ON (cs.id=si.course_id)
+          WHERE
+              cs.id=#{courseId}
+              AND si.opt_type='XK'
+        ]]>
+	</select>
+
+	<select id="queryForAttendance" resultMap="attendanceMap" parameterType="long">
+		<![CDATA[
+          SELECT si.student_id studentId,si.course_id courseId,ca.name studentName,
+            ca.gender gender,ca.phone phone,si.attendance attendance
+          FROM course c JOIN sc_info si ON (c.id=si.course_id)
+            JOIN student ca ON (ca.id=si.student_id)
+          WHERE si.course_id=#{courseId} AND si.opt_type="XK"
+        ]]>
+	</select>
+
+	<update id="changeAttendance" parameterType="org.forten.scss.dto.vo.AttendanceVo">
+		<![CDATA[
+          UPDATE sc_info SET attendance=#{attendance}
+          WHERE course_id=#{courseId} AND student_id=#{studentId}
+        ]]>
+	</update>
 </mapper>

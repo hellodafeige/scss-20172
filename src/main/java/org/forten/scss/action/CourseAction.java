@@ -6,8 +6,7 @@ import org.forten.dto.Message;
 import org.forten.scss.bo.CourseBo;
 import org.forten.scss.dto.qo.CourseQoForTeacher;
 import org.forten.scss.dto.ro.PagedRoForEasyUI;
-import org.forten.scss.dto.vo.CourseForTeacher;
-import org.forten.scss.dto.vo.CourseUpdateForTeacher;
+import org.forten.scss.dto.vo.*;
 import org.forten.scss.entity.Course;
 import org.forten.utils.common.DateUtil;
 import org.forten.utils.common.StringUtil;
@@ -142,6 +141,36 @@ public class CourseAction {
         }
     }
 
+    @PostMapping("/course/exportNameList")
+    public void exportNameList(CourseVoForNameList vo, HttpServletResponse response) {
+        List<NameListVo> list = bo.queryNameList(vo.getId());
+        try (Workbook wb = new XSSFWorkbook()) {
+            Sheet sheet = wb.createSheet("学员名单");
+
+            sheet.createRow(0).createCell(0).setCellValue(vo.getName());
+            Row second = sheet.createRow(1);
+            second.createCell(0).setCellValue("讲师：" + vo.getTeacher());
+            second.createCell(1).setCellValue("上课时间" + vo.getBeginTeachTime());
+            second.createCell(2).setCellValue("学分" + vo.getCredit());
+
+            for (int i = 0; i < list.size(); i++) {
+                NameListVo nameVo = list.get(i);
+                Row dataRow = sheet.createRow(i + 2);
+                dataRow.createCell(0).setCellValue(nameVo.getGender());
+                dataRow.createCell(1).setCellValue(nameVo.getName());
+                dataRow.createCell(2).setCellValue(nameVo.getPhone());
+            }
+
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=name-list.xlsx");
+            ServletOutputStream out = response.getOutputStream();
+            wb.write(out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     @PostMapping("/course/importData")
     public void importData(MultipartFile file){
         List<Course> list = new ArrayList<>();
@@ -181,4 +210,23 @@ public class CourseAction {
         bo.doBatchSave(list.toArray(new Course[list.size()]));
     }
 
+    @GetMapping("/course/finished")
+    public List<CourseForTeacher> getFinished() {
+        return bo.queryFinised();
+    }
+
+    @GetMapping("/course/attendance/{courseId}")
+    public List<AttendanceVo> getScInfoForAttendance(@PathVariable long courseId) {
+        return bo.queryForAttendance(courseId);
+    }
+
+    @PutMapping("/course/attendance")
+    public Message changeAttendance(@RequestBody AttendanceVo vo){
+        try{
+            bo.doChangeAttendance(vo);
+            return Message.info("考勤维护成功！");
+        }catch(Exception e){
+            return Message.error("考勤维护失败！");
+        }
+    }
 }

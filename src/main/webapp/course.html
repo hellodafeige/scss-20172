@@ -11,33 +11,47 @@
 </head>
 <body>
 <div class="container">
-    <div id="tool-bar" style="padding:3px">
-        <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="openSaveDialog()">添加新课程</a>
-        <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="openUpdateDialog()">编辑</a>
-        <form id="search-form" action="/course/export" method="POST">
-            <span>名称</span>
-            <input id="name" name="name" style="line-height:20px;border:1px solid #ccc">
-            <span>状态</span>
-            <select id="status" name="status">
-                <option value="">请选择</option>
-                <option value="AC">待选</option>
-                <option value="PS">备选</option>
-                <option value="CM">结束</option>
-            </select>
-            <span>开始</span>
-            <input id="begin" name="begin" type="date" style="line-height:20px;border:1px solid #ccc">
-            <span>结束</span>
-            <input id="end" name="begin" type="date" style="line-height:20px;border:1px solid #ccc">
-            <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">查询</a>
-            <a href="#" class="easyui-linkbutton" plain="true" onclick="doExport()">导出数据</a>
-        </form>
+    <div id="tabs" class="easyui-tabs">
+        <div title="课程信息">
+            <div id="tool-bar" style="padding:3px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true"
+                   onclick="openSaveDialog()">添加新课程</a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" plain="true"
+                   onclick="openUpdateDialog()">编辑</a>
+                <form id="search-form" action="/course/export" method="POST">
+                    <span>名称</span>
+                    <input id="name" name="name" style="line-height:20px;border:1px solid #ccc">
+                    <span>状态</span>
+                    <select id="status" name="status">
+                        <option value="">请选择</option>
+                        <option value="AC">待选</option>
+                        <option value="PS">备选</option>
+                        <option value="CM">结束</option>
+                    </select>
+                    <span>开始</span>
+                    <input id="begin" name="begin" type="date" style="line-height:20px;border:1px solid #ccc">
+                    <span>结束</span>
+                    <input id="end" name="begin" type="date" style="line-height:20px;border:1px solid #ccc">
+                    <a href="#" class="easyui-linkbutton" plain="true" onclick="doSearch()">查询</a>
+                    <a href="#" class="easyui-linkbutton" plain="true" onclick="doExport()">导出数据</a>
+                    <a href="#" class="easyui-linkbutton" plain="true" onclick="doExportNameList()">导出学员名单</a>
+                </form>
+            </div>
+            <table id="course-list"></table>
+            <form id="upload-form" method="POST" enctype="multipart/form-data">
+                <input type="file" id="file" name="file"/>
+                <button type="button" onclick="upload()">导入</button>
+            </form>
+            <progress id="progressBar" value="0" max="100"></progress>
+            <span id="target"></span>
+        </div>
+        <div title="考勤维护">
+            <div id="finished-tool-bar" style="padding:3px">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="nameList()">人员名单</a>
+            </div>
+            <table id="finished-list"></table>
+        </div>
     </div>
-    <table id="course-list"></table>
-    <form id="upload-form" method="POST" enctype="multipart/form-data">
-        <input type="file" id="file" name="file" />
-        <button type="button" onclick="upload()">导入</button>
-    </form>
-    <progress id="progressBar" value="0" max="100" ></progress><span id="target"></span>
 </div>
 <!-- 保存对话框开始 -->
 <div id="save-dialog" hidden>
@@ -136,6 +150,14 @@
 </div>
 <!-- 数据修改对话框结束 -->
 
+<form id="name-list-form" action="/course/exportNameList" method="POST">
+    <input type="hidden" id="nl-name" name="name"/>
+    <input type="hidden" id="nl-id" name="id"/>
+    <input type="hidden" id="nl-teacher" name="teacher"/>
+    <input type="hidden" id="nl-begin-teach-time" name="beginTeachTime"/>
+    <input type="hidden" id="nl-credit" name="credit"/>
+</form>
+
 <script src="js/jquery-3.2.1.js"></script>
 <script src="js/bootstrap.js"></script>
 <script src="js/jquery-ui.js"></script>
@@ -166,6 +188,56 @@
             {field: 'status', title: '状态', width: 40, resizable: true}
         ]]
     });
+
+
+    $('#finished-list').datagrid({
+        title: "课程列表",
+        url: '/course/finished',
+        method: "GET",
+        pagination: true,
+        pageList: [3, 5, 10],
+        toolbar: "#finished-tool-bar",
+        columns: [[
+            {field: 'idStr', title: 'ID', checkbox: true, resizable: true},
+            {field: 'name', title: '名称', width: 100, resizable: true},
+            {field: 'teacher', title: '讲师', width: 50, resizable: true},
+            {field: 'serviceTeacher', title: '班主任', width: 50, resizable: true},
+            {field: 'serviceTeacherTel', title: '班主任电话', width: 100, resizable: true},
+            {field: 'classroom', title: '教室', width: 50, resizable: true},
+            {field: 'beginTeachTime', title: '开始上课时间', width: 150, resizable: true},
+            {field: 'endTeachTime', title: '结束上课时间', width: 150, resizable: true},
+            {field: 'beginSelectTime', title: '开始选课时间', width: 150, resizable: true},
+            {field: 'endSelectTime', title: '结束选课时间', width: 150, resizable: true},
+            {field: 'credit', title: '学分', width: 40, resizable: true},
+            {field: 'maxAmount', title: '课容量', width: 40, resizable: true},
+            {field: 'currentAmount', title: '已选人数', width: 40, resizable: true},
+            {field: 'status', title: '状态', width: 40, resizable: true}
+        ]]
+    });
+
+
+    // $('#finished-list').datagrid({
+    //     title: "已完成课程列表",
+    //     url: '/course/finished',
+    //     method: "GET",
+    //     toolbar: "#finished-tool-bar",
+    //     columns: [[
+    //         {field: 'idStr', title: 'ID', checkbox: true, resizable: true},
+    //         {field: 'name', title: '名称', width: 100, resizable: true},
+    //         {field: 'teacher', title: '讲师', width: 50, resizable: true},
+    //         {field: 'serviceTeacher', title: '班主任', width: 50, resizable: true},
+    //         {field: 'serviceTeacherTel', title: '班主任电话', width: 100, resizable: true},
+    //         {field: 'classroom', title: '教室', width: 50, resizable: true},
+    //         {field: 'beginTeachTime', title: '开始上课时间', width: 150, resizable: true},
+    //         {field: 'endTeachTime', title: '结束上课时间', width: 150, resizable: true},
+    //         {field: 'beginSelectTime', title: '开始选课时间', width: 150, resizable: true},
+    //         {field: 'endSelectTime', title: '结束选课时间', width: 150, resizable: true},
+    //         {field: 'credit', title: '学分', width: 40, resizable: true},
+    //         {field: 'maxAmount', title: '课容量', width: 40, resizable: true},
+    //         {field: 'currentAmount', title: '已选人数', width: 40, resizable: true},
+    //         {field: 'status', title: '状态', width: 40, resizable: true}
+    //     ]]
+    // });
 
     function doSearch() {
         $('#course-list').datagrid('load', {
@@ -290,6 +362,18 @@
         $("#search-form").get(0).submit();
     }
 
+    function doExportNameList() {
+        let course = $("#course-list").datagrid('getSelected');
+
+        $("#nl-id").val(course.id);
+        $("#nl-name").val(course.name);
+        $("#nl-begin-teach-time").val(course.beginTeachTime);
+        $("#nl-teacher").val(course.teacher);
+        $("#nl-credit").val(course.credit);
+
+        $("#name-list-form").get(0).submit();
+    }
+
     function upload() {
         var fileObj = document.getElementById("file").files[0]; // 获取文件对象
         var FileController = "/course/importData"; // 接收上传文件的后台URL
@@ -315,6 +399,58 @@
                 + "%";
         }
     }
+
+    // function nameList() {
+    //     let course = $("#finished-list").datagrid("getSelected");
+    //     let table = "";
+    //     $.ajax({
+    //         url: "/course/attendance/" + course.idStr,
+    //         type: "GET",
+    //         contentType: "application/json"
+    //     }).then(function (vos) {
+    //         table = "<table class='table'><tr><th>性别</th><th>姓名</th><th>电话</th><th>出勤情况</th></tr>";
+    //         $.each(vos, function (i, vo) {
+    //             table = table + "<tbody><tr><td>" + vo.gender +
+    //                 "</td><td>" + vo.studentName +
+    //                 "</td><td>" + vo.phone +
+    //                 "</td><td>" +
+    //                 "<input name='cq' type='radio' value='CQ' class='cq-radio' data-student-id='" + vo.studentId + "' data-course-id='" + vo.courseId + "' " + ((vo.attendance == 'CQ') ? 'checked' : '') + " /> 出勤" +
+    //                 "<input name='cq' type='radio' value='QQ' class='cq-radio' data-student-id='" + vo.studentId + "' data-course-id='" + vo.courseId + "' " + ((vo.attendance == 'QQ') ? 'checked' : '') + " /> 缺勤" +
+    //                 "</td></tr></tbody>";
+    //         });
+    //         table = table + "</table>";
+    //         $("#tabs").tabs("add", {
+    //             title: course.name,
+    //             selected: true,
+    //             closable: true,
+    //             content: table
+    //         });
+    //     }, function (xhr) {
+    //         alert(xhr.responseText);
+    //     });
+    // };
+    //
+    // $(function () {
+    //     $("#tabs").on('click', '.cq-radio', function () {
+    //         let vo = {
+    //             "courseId": $(this).data('course-id'),
+    //             "studentId": $(this).data('student-id'),
+    //             "attendance": $(this).val()
+    //         };
+    //
+    //         $.ajax({
+    //             url: "/course/attendance",
+    //             type: "PUT",
+    //             data: JSON.stringify(vo),
+    //             dataType: "json",
+    //             contentType: "application/json"
+    //         }).then(function (msg) {
+    //             alert(msg.messageText);
+    //         },function (xhr) {
+    //             alert(xhr.responseText);
+    //         });
+    //     });
+    // });
 </script>
 </body>
 </html>
