@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Controller
+@RestController
 public class CourseAction {
     @Resource
     private CourseBo bo;
@@ -228,5 +228,10 @@ public class CourseAction {
         }catch(Exception e){
             return Message.error("考勤维护失败！");
         }
+    }
+
+    @GetMapping("/course/pie/{courseId}")
+    public CoursePie getPie(@PathVariable long courseId){
+        return bo.queryForPie(courseId);
     }
 }

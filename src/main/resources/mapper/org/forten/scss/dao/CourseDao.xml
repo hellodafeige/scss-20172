@@ -34,6 +34,11 @@
 		<result property="attendance" column="attendance"/>
 	</resultMap>
 
+	<resultMap type="org.forten.scss.dto.vo.ScInfoPie" id="scInfoPieMap">
+		<result property="name" column="optType"/>
+		<result property="value" column="scCount"/>
+	</resultMap>
+
 	<select id="queryCountForTeacher" resultType="long">
 		SELECT
 		count(id)
@@ -129,4 +134,19 @@
           WHERE course_id=#{courseId} AND student_id=#{studentId}
         ]]>
 	</update>
+
+	<select id="findForPie" resultMap="scInfoPieMap" parameterType="long">
+		<![CDATA[
+          SELECT count(student_id) scCount,
+            CASE
+                WHEN opt_type='XK' THEN '选中'
+                WHEN opt_type='TK' THEN '退课'
+                ELSE '排队'
+            END
+            optType
+          FROM sc_info
+          WHERE course_id=#{courseId}
+          GROUP BY opt_type;
+        ]]>
+	</select>
 </mapper>
