@@ -1,5 +1,7 @@
 package org.forten.scss.bo;
 
+import freemarker.template.Template;
+import org.apache.commons.mail.SimpleEmail;
 import org.forten.dao.HibernateDao;
 import org.forten.dao.MybatisDao;
 import org.forten.dto.Message;
@@ -8,12 +10,20 @@ import org.forten.scss.dto.qo.CreditQoForCount;
 import org.forten.scss.dto.vo.CourseVoForSelect;
 import org.forten.scss.dto.vo.SelectInfoVoForWrite;
 import org.forten.scss.entity.SysParams;
+import org.forten.utils.common.DateUtil;
+import org.forten.utils.common.NumberUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static org.forten.utils.system.PropertiesFileReader.getValue;
 
 @Service
 public class SelectCourseBo {
@@ -21,6 +31,8 @@ public class SelectCourseBo {
     private MybatisDao mybatisDao;
     @Resource
     private HibernateDao dao;
+    @Resource
+    private FreeMarkerConfigurer fmc;
 
     @Transactional(readOnly = true)
     public List<CourseVoForSelect> queryForSelect(long studentId){
@@ -121,6 +133,45 @@ public class SelectCourseBo {
         }
 
         return c;
+    }
+
+    @Transactional(readOnly = true)
+    public void sendRemindEmail() {
+        SelectCourseDao dao = getSelectCourseDao();
+        List<CourseVoForSelect> voList = dao.findWillTeached();
+        SimpleEmail email = new SimpleEmail();
+        try {
+            email.setAuthentication(getValue("system/email", "USERNAME"), getValue("system/email", "PASSWORD"));
+            email.setCharset("UTF-8");
+            email.setFrom(getValue("system/email", "FROM"));
+            email.setSSLOnConnect(true);
+            email.setHostName(getValue("system/email", "HOST"));
+            email.setSmtpPort(NumberUtil.parseNumber(getValue("system/email", "PORT"), Integer.class));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (CourseVoForSelect vo : voList) {
+            List<String> emails = dao.findEmails(vo.getId());
+
+            try {
+                email.addTo(emails.toArray(new String[emails.size()]));
+                email.setSubject("<" + vo.getName() + ">开课通知");
+
+                Template template = fmc.getConfiguration().getTemplate("email.ftl");
+                Map<String, Object> data = new HashMap<>();
+                data.put("name", vo.getName());
+                data.put("begin", DateUtil.convertDateToString(vo.getBeginTeachTime(), "MM月dd日HH:mm"));
+                data.put("classroom", vo.getClassroom());
+
+                String msg = FreeMarkerTemplateUtils.processTemplateIntoString(template, data);
+                System.out.println(msg);
+                email.setMsg(msg);
+
+                email.send();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private SelectCourseDao getSelectCourseDao(){

@@ -2,7 +2,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:util="http://www.springframework.org/schema/util" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd
            http://www.springframework.org/schema/tx
@@ -11,8 +13,11 @@
            http://www.springframework.org/schema/context/spring-context.xsd
            http://www.springframework.org/schema/util
            http://www.springframework.org/schema/util/spring-util.xsd">
+           http://www.springframework.org/schema/task
+           http://www.springframework.org/schema/task/spring-task.xsd">
     <context:component-scan base-package="org.forten.**.dao"></context:component-scan>
     <context:component-scan base-package="org.forten.**.bo"></context:component-scan>
+    <context:component-scan base-package="org.forten.**.task" ></context:component-scan>
     <!-- 读取项目中特定位置上的属性文件 -->
     <!-- 一旦读取成功，就可以使用${属性名}方式得到属性的值 -->
     <context:property-placeholder location="classpath*:/system/*.properties"/>
@@ -78,6 +83,12 @@
         <property name="sqlSessionFactory" ref="sqlSessionFactory" />
     </bean>
 
+    <!-- 配置freeMarker的模板路径 -->
+    <bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+        <property name="templateLoaderPath" value="WEB-INF/freemarkTemplate" />
+        <property name="defaultEncoding" value="UTF-8" />
+    </bean>
+
     <!-- 通知Spring容器，我们使用annotation方式进行事务管理 -->
     <tx:annotation-driven/>
 
@@ -95,4 +106,6 @@
     <util:list id="packagesToScanList">
         <value>org.forten.**.entity</value>
     </util:list>
+
+    <task:annotation-driven />
 </beans>

@@ -1,0 +1,1 @@
+您选择的${name}将于${begin}在${classroom}上课，请届时参加！

@@ -150,4 +150,22 @@
                 AND (si.opt_type='XK' OR si.opt_type='PD');
         ]]>
     </select>
+
+    <select id="findWillTeached" resultMap="courseMapForSelect">
+        <![CDATA[
+            SELECT id,name,begin_teach_time,classroom
+            FROM course
+            WHERE begin_teach_time
+            BETWEEN date_add(date_add(current_date, interval 2 day),interval 8 hour)
+            AND date_add(date_add(current_date, interval 2 day),interval 19 hour)
+        ]]>
+    </select>
+    <select id="findEmails" resultType="String" parameterType="long">
+        <![CDATA[
+            SELECT c.mailbox
+            FROM student c JOIN sc_info si
+            ON (c.id=si.student_id)
+            WHERE si.course_id=#{courseId} AND si.opt_type='XK'
+        ]]>
+    </select>
 </mapper>
